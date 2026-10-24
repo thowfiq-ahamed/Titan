@@ -32,9 +32,9 @@ jobs:
         id: meta
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           echo "IMAGE_TAG=sha-${SHORT_SHA}" >> $GITHUB_OUTPUT
-          echo "REGISTRY_IMAGE=ghcr.io/${REPO_LOWER}/titan-inventory-api" >> $GITHUB_OUTPUT
+          echo "REGISTRY_IMAGE=ghcr.io/${OWNER_LOWER}/titan-inventory-api" >> $GITHUB_OUTPUT
 
       - name: Build and Push Immutable Container Image
         uses: docker/build-push-action@v5

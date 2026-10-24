@@ -137,7 +137,7 @@ Nine critical, high, and medium issues were identified, isolated, repaired, and 
 - **Evidence:** `exit-code: '0'` in Trivy scan step allowed critical CVEs to pass without failing the build.
 - **Root Cause:** Lack of enforcement tier in security stage.
 - **Remediation Implemented:**
-  - Pinned Trivy action to maintained release: `aquasecurity/trivy-action@0.28.0` (replacing `master`).
+  - Pinned Trivy action to maintained release: `aquasecurity/trivy-action@v0.28.0` (with explicit `v` prefix).
   - Added two-tier DevSecOps gate:
     1. Informational scan: Outputs human-readable table of HIGH and CRITICAL vulnerabilities (`exit-code: '0'`).
     2. Enforcing gate: Halts pipeline on fixable CRITICAL vulnerabilities (`exit-code: '1'`, `ignore-unfixed: true`, `severity: 'CRITICAL'`).
