@@ -5,21 +5,25 @@ namespace: titan-dev
 namePrefix: dev-
 
 resources:
-  - ../../base
+- ../../base
 
 patches:
-  - target:
-      kind: Deployment
-      name: inventory-api
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
+- patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 1
+  target:
+    kind: Deployment
+    name: inventory-api
 
 configMapGenerator:
-  - name: inventory-api-config
-    behavior: merge
-    literals:
-      - ENVIRONMENT=dev
-      - LOG_LEVEL=DEBUG
-      - ENABLE_FAULT_INJECTION=false
+- behavior: merge
+  literals:
+  - ENVIRONMENT=dev
+  - LOG_LEVEL=DEBUG
+  - ENABLE_FAULT_INJECTION=false
+  name: inventory-api-config
+images:
+- name: ghcr.io/thowfiq-ahamed/titan-inventory-api
+  newName: ghcr.io/thowfiq-ahamed/titan-inventory-api
+  newTag: sha-ca59b2a
