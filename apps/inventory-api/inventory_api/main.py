@@ -4,26 +4,23 @@ Standardized enterprise FastAPI service with Prometheus metrics,
 correlation ID tracing, structured logging, and Kubernetes lifecycle hooks.
 """
 
+import random
 import time
 import uuid
-import random
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+
 from fastapi import FastAPI, Request, Response, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .config import settings
-from .logging import logger, correlation_id_ctx
 from .database import init_db
-from .metrics import (
-    HTTP_REQUESTS_TOTAL,
-    HTTP_REQUEST_DURATION_SECONDS,
-    get_metrics_response
-)
-from .routers import health, items, fault_injection
+from .logging import correlation_id_ctx, logger
+from .metrics import HTTP_REQUEST_DURATION_SECONDS, HTTP_REQUESTS_TOTAL, get_metrics_response
+from .routers import fault_injection, health, items
 from .routers.fault_injection import get_runtime_fault_state
 
 

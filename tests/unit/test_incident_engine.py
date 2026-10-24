@@ -3,8 +3,9 @@ Unit & API tests for TITAN Incident Engine
 """
 
 from fastapi.testclient import TestClient
-from services.incident_engine.incident_engine.rules import diagnose_incident
-from services.incident_engine.incident_engine.main import app
+
+from incident_engine.main import app
+from incident_engine.rules import diagnose_incident
 
 client = TestClient(app)
 

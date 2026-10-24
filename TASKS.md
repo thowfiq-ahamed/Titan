@@ -87,3 +87,15 @@
   - [x] Repeatable 10-minute technical interview demonstration runbook (`docs/interview-preparation/INTERVIEW_DEMO_RUNBOOK.md`)
   - [x] On-call SRE incident response runbook (`docs/runbooks/INCIDENT_RESPONSE_RUNBOOK.md`)
   - [x] Final comprehensive `README.md` with system architecture diagrams, test results, and benchmark reports
+
+- [x] **Phase 11: Post-Build Engineering Audit, Pipeline Repair & Hardening**
+  - [x] Comprehensive root-cause audit documented in `docs/audits/POST_BUILD_AUDIT.md`
+  - [x] Root `pyproject.toml` created with Ruff lint rules, modern Python 3.11/3.12 settings, and framework exemptions
+  - [x] Package structure deduplicated and standardized across canonical modules
+  - [x] CI workflow repaired: Ruff linting across all packages + 33 tests passing with full test runner coverage
+  - [x] Container publication workflow repaired: Lowercase GHCR image naming + pinned Kustomize v2 + PR-based GitOps update
+  - [x] Argo CD application manifests updated to target real repository `thowfiq-ahamed/Titan.git`
+  - [x] Fault injection hardened: Disabled by default (`ENABLE_FAULT_INJECTION=false`), removed predictable token fallback, bound compose ports to `127.0.0.1`
+  - [x] DevSecOps Trivy scanning hardened: Pinned version `0.28.0` with informational reporting and enforcing CRITICAL gate
+  - [x] Terraform AWS EKS version updated to supported `1.31` with parameterized variable
+  - [x] Fresh-clone onboarding experience verified and `README.md` updated with dynamic workflow badges

@@ -2,15 +2,14 @@
 TITAN Platform API - Reliability Lab Experiment Endpoints
 """
 
-from typing import List, Optional
-from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, status
+
+from fastapi import APIRouter, Depends, status
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 
-from ..database import get_platform_db, ExperimentModel
 from ..auth import require_api_key
+from ..database import ExperimentModel, get_platform_db
 
 router = APIRouter(prefix="/api/v1/experiments", tags=["Reliability Experiments"])
 
@@ -34,10 +33,10 @@ class ExperimentResponseDTO(ExperimentRecordDTO):
     created_at: str
 
 
-@router.get("", response_model=List[ExperimentResponseDTO])
+@router.get("", response_model=list[ExperimentResponseDTO])
 def list_experiments(
-    target_service: Optional[str] = None,
-    scenario_id: Optional[str] = None,
+    target_service: str | None = None,
+    scenario_id: str | None = None,
     db: Session = Depends(get_platform_db)
 ):
     query = select(ExperimentModel)

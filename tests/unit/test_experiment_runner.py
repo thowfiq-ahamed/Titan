@@ -2,12 +2,12 @@
 Unit tests for TITAN Reliability Lab Experiment Runner
 """
 
-from unittest.mock import MagicMock
-from datetime import datetime, timezone
-from packages.experiment_runner.src.runner import ExperimentRunner
-from packages.experiment_runner.src.scenarios.base import BaseScenario
-from packages.experiment_runner.src.strategies.app_rollback import ApplicationRollbackStrategy
-from packages.experiment_runner.src.strategies.policy_recovery import PolicyControlledRecoveryStrategy
+from datetime import UTC, datetime
+
+from experiment_runner.runner import ExperimentRunner
+from experiment_runner.scenarios.base import BaseScenario
+from experiment_runner.strategies.app_rollback import ApplicationRollbackStrategy
+from experiment_runner.strategies.policy_recovery import PolicyControlledRecoveryStrategy
 
 
 class MockScenario(BaseScenario):
@@ -26,25 +26,25 @@ class MockScenario(BaseScenario):
 
     def inject_fault(self):
         self.fault_active = True
-        self.fault_injected_at = datetime.now(timezone.utc)
+        self.fault_injected_at = datetime.now(UTC)
         return {"status": "injected"}
 
     def check_detection_signal(self) -> bool:
         if self.fault_active:
-            self.detected_at = datetime.now(timezone.utc)
+            self.detected_at = datetime.now(UTC)
             return True
         return False
 
     def verify_recovery(self) -> bool:
         if not self.fault_active:
-            self.recovered_at = datetime.now(timezone.utc)
+            self.recovered_at = datetime.now(UTC)
             return True
         return False
 
     def cleanup(self):
         self.fault_active = False
         self.cleaned_up = True
-        self.completed_at = datetime.now(timezone.utc)
+        self.completed_at = datetime.now(UTC)
 
 
 def test_experiment_runner_full_cycle():

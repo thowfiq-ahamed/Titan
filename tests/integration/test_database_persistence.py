@@ -4,8 +4,9 @@ Integration tests for Database Persistence and Session Handling.
 
 import pytest
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
 from inventory_api.models.item import Item
 
 

@@ -3,8 +3,9 @@ TITAN Inventory API - Structured JSON Logging
 Provides standardized structured JSON output with context and correlation ID support.
 """
 
-import sys
 import logging
+import sys
+
 try:
     from pythonjsonlogger.json import JsonFormatter
 except ImportError:

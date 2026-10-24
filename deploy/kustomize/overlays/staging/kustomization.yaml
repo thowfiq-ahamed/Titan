@@ -22,4 +22,4 @@ configMapGenerator:
     literals:
       - ENVIRONMENT=staging
       - LOG_LEVEL=INFO
-      - ENABLE_FAULT_INJECTION=true
+      - ENABLE_FAULT_INJECTION=false

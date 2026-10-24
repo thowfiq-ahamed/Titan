@@ -1,19 +1,21 @@
 # TITAN: Cloud-Native Delivery, Platform Engineering & Reliability Intelligence Platform
 
-[![Tests](https://img.shields.io/badge/tests-33%20passed-brightgreen.svg)]()
+[![CI](https://github.com/thowfiq-ahamed/Titan/actions/workflows/ci.yaml/badge.svg)](https://github.com/thowfiq-ahamed/Titan/actions/workflows/ci.yaml)
+[![Release & GitOps](https://github.com/thowfiq-ahamed/Titan/actions/workflows/release-gitops.yaml/badge.svg)](https://github.com/thowfiq-ahamed/Titan/actions/workflows/release-gitops.yaml)
+[![Tests](https://img.shields.io/badge/tests-34%20passed-brightgreen.svg)]()
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg?logo=fastapi&logoColor=white)]()
-[![Kubernetes](https://img.shields.io/badge/Kubernetes-1.30+-326CE5.svg?logo=kubernetes&logoColor=white)]()
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-1.31-326CE5.svg?logo=kubernetes&logoColor=white)]()
 [![ArgoCD](https://img.shields.io/badge/GitOps-Argo%20CD-EF7B4D.svg?logo=argo&logoColor=white)]()
 [![Terraform](https://img.shields.io/badge/IaC-Terraform%201.5+-844FBA.svg?logo=terraform&logoColor=white)]()
 [![Docker](https://img.shields.io/badge/Docker-Multi--Stage-2496ED.svg?logo=docker&logoColor=white)]()
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-**TITAN** is a cloud-native platform engineering and Site Reliability Engineering (SRE) portfolio project designed to demonstrate enterprise architecture and production operations. It bridges the gap between **high-velocity deployment** and **automated operational resilience**.
+**TITAN** is a cloud-native platform engineering and Site Reliability Engineering (SRE) portfolio project designed to demonstrate enterprise architecture, GitOps delivery, and production operations. It bridges the gap between **high-velocity deployment** and **automated operational resilience**.
 
 It provides:
 1. **TITAN Developer Platform**: Microservice catalog registration, multi-environment Kubernetes manifests (Helm & Kustomize), and GitOps delivery.
 2. **TITAN Reliability Lab**: Chaos & resilience testing subsystem that introduces bounded, controlled failures, verifies automated recovery strategies, and computes reproducible MTTR/MTTD benchmarks.
-3. **TITAN Incident Engine**: Deterministic Root Cause Analysis (RCA) service that consumes Alertmanager webhooks, correlates multi-signal diagnostic evidence (alerts, metrics, logs, probe deadlocks), and recommends allowlisted remediations with zero shell hallucination risks.
+3. **TITAN Incident Engine**: Deterministic Root Cause Analysis (RCA) service that consumes Alertmanager webhooks, correlates multi-signal diagnostic evidence (alerts, metrics, logs, probe deadlocks), and executes allowlist-gated automated remediations with strict policy verification.
 
 ---
 
@@ -32,9 +34,9 @@ It provides:
             ▼                                   ▼
  [ GitHub Actions CI / Jenkins ]     [ SQLite / PostgreSQL Persistence ]
    • Code Lint & Unit Tests                     │
-   • Trivy / Snyk Security Scan                 ├───────────────────────────────┐
+   • Trivy Security Policy Gate                 ├───────────────────────────────┐
    • Docker Build & Immutable Tag               ▼                               ▼
-   • Manifest Update (GitOps)        [ TITAN Incident Engine ]      [ TITAN Reliability Lab ]
+   • Manifest PR Update (GitOps)     [ TITAN Incident Engine ]      [ TITAN Reliability Lab ]
             │                           • Alertmanager Webhook         • Controlled Fault Injection
             ▼                           • Telemetry & Log Correlator   • Verification Probe
      [ Git Repository ]                 • Deterministic Diagnosis      • MTTR/MTTD Benchmark Engine
@@ -42,16 +44,16 @@ It provides:
             │                                   │                               │
             ▼                                   ▼                               │
      [ Argo CD Controller ] ────────► [ Kubernetes Cluster ] ◄──────────────────┘
-   (Sync, Health, Self-Healing)         (Kind / EKS)
+   (Sync, Health, Self-Healing)         (Kind / EKS 1.31)
                                                 │
                  ┌──────────────────────────────┼──────────────────────────────┐
                  ▼                              ▼                              ▼
       [ Apps: Inventory API ]         [ Observability Stack ]        [ Security & Config ]
       • FastAPI + Pydantic v2         • Prometheus Scraper           • Vault / K8s Secrets
       • SQLAlchemy 2.x + Alembic      • Alertmanager Rules           • Least-Privilege RBAC
-      • /health/live & /ready         • Grafana Dashboards           • Non-Root Container
+      • /health/live & /ready         • Grafana Dashboards           • Non-Root Container (10001)
       • Structured JSON Logs          • Fluentbit / ELK Pipeline     • NetworkPolicies
-      • /metrics Prometheus           • Splunk Event Adapter
+      • /metrics Prometheus           • Splunk Event Adapter         • Loopback-Restricted Dev Ports
 ```
 
 ---
@@ -64,12 +66,12 @@ It provides:
 | **CLI & Tools** | Python CLI (`scripts/titan.py`), Click, Argparse, Requests |
 | **Frontend UI** | React 18, TypeScript, Vite, Modern Responsive Design System |
 | **Containerization** | Docker, Multi-Stage Hardened Builds (Non-Root UID 10001), Docker Compose |
-| **Orchestration** | Kubernetes 1.30+, Helm v3, Kustomize (bases + overlays for dev/staging/prod) |
+| **Orchestration** | Kubernetes 1.31, Helm v3, Kustomize (bases + overlays for dev/staging/prod) |
 | **GitOps** | Argo CD (primary), Flux CD (isolated comparison) |
-| **Cloud & IaC** | AWS (VPC, EKS, RDS, ECR, IAM, S3, Secrets Manager), Terraform (modular + state lock) |
+| **Cloud & IaC** | AWS (VPC, EKS 1.31, RDS, ECR, IAM, S3, Secrets Manager), Terraform (modular + state lock) |
 | **CI/CD** | GitHub Actions (primary), Jenkins Declarative Pipeline |
 | **Observability** | Prometheus, Alertmanager, Grafana, ELK (Logstash), Splunk HEC Adapter |
-| **DevSecOps** | Trivy vulnerability scanning, Snyk, HashiCorp Vault, Kubernetes NetworkPolicies |
+| **DevSecOps** | Trivy vulnerability scanning (enforcing CRITICAL gate), HashiCorp Vault, Kubernetes NetworkPolicies |
 
 ---
 
@@ -80,7 +82,7 @@ A production-grade microservice handling asset and inventory tracking.
 - **Data Layer**: SQLAlchemy 2.0 with PostgreSQL persistence and Alembic migrations (`001_initial_schema.py`).
 - **Telemetry**: Exposes `/health/live`, `/health/ready` (with database ping latency profiling), and native `/metrics` for Prometheus scraping.
 - **Structured JSON Logging**: Standardized JSON format with `X-Correlation-ID` tracing across requests.
-- **Reliability Lab Fault Gate**: Controlled fault endpoints (`/test/faults/*`) guarded by `ENABLE_FAULT_INJECTION=true` and `X-Titan-Fault-Auth`.
+- **Reliability Lab Fault Gate**: Controlled fault endpoints (`/test/faults/*`) guarded by `ENABLE_FAULT_INJECTION=true` and explicit `X-Titan-Fault-Auth` token verification. Fault injection is strictly disabled by default.
 
 ### 2. Platform API & CLI (`services/platform-api` & `scripts/titan.py`)
 Central platform control plane providing REST endpoints and a developer CLI:
@@ -109,22 +111,85 @@ Deterministic Root Cause Analysis engine:
 - Consumes Prometheus Alertmanager webhooks.
 - Correlates firing alerts, metric golden signals, probe status, and recent GitOps deployment rollouts.
 - Emits structured diagnoses with root cause, supporting evidence, contradictory evidence, and confidence score.
-- Enforces strict allowlist policies (zero arbitrary shell execution).
+- Enforces strict allowlist policies and approval requirements before executing state-changing recoveries.
 
 ### 5. Cloud Infrastructure as Code (`terraform/`)
 Modular, reusable Terraform configuration:
 - `bootstrap`: S3 state bucket with AES256 encryption, versioning, and DynamoDB locking.
-- `modules`: `vpc` (3-tier networking), `security_groups`, `iam` (GitHub Actions OIDC keyless trust), `ecr` (immutable tags + scan-on-push), `eks` (Kubernetes 1.30 managed cluster), `rds` (PostgreSQL 16 in private DB subnets).
+- `modules`: `vpc` (3-tier networking), `security_groups`, `iam` (GitHub Actions OIDC keyless trust), `ecr` (immutable tags + scan-on-push), `eks` (Kubernetes 1.31 managed cluster), `rds` (PostgreSQL 16 in private DB subnets).
 - `environments`: Isolated configurations for `dev` and `staging`.
+
+---
+
+## Clean-Checkout Setup Guide
+
+Follow these steps from a fresh clone to install, test, and run the platform:
+
+### 1. Prerequisites
+- **Python**: Version 3.11 or 3.12+
+- **Docker & Docker Compose**: v2.20+
+- **Node.js**: v18+ (for Web Dashboard UI)
+- **Terraform**: v1.5+ (optional, for AWS IaC verification)
+
+### 2. Environment Setup & Automated Tests
+```powershell
+# Clone the repository
+git clone https://github.com/thowfiq-ahamed/Titan.git
+cd Titan
+
+# Create and activate virtual environment
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1    # On Linux/macOS: source .venv/bin/activate
+
+# Install application dependencies, test runner, and linters
+pip install --upgrade pip
+pip install -r apps/inventory-api/requirements.txt
+pip install ruff pytest-cov
+
+# Run code quality lint gate
+ruff check apps/ services/ packages/ tests/ scripts/
+
+# Run the complete test suite (33 tests)
+pytest -v
+```
+
+### 3. Local Container Run with Docker Compose
+Local ports are securely bound to `127.0.0.1` by default to prevent unauthorized external network exposure:
+```powershell
+# Validate compose configuration
+docker compose config
+
+# Start PostgreSQL and Inventory API in isolated bridge network
+docker compose up -d
+
+# Verify container health
+docker compose ps
+curl http://127.0.0.1:8001/health/live
+curl http://127.0.0.1:8001/health/ready
+```
+
+### 4. Safe Execution of Reliability Lab Experiments
+Fault injection is disabled by default (`ENABLE_FAULT_INJECTION=false`). To run a local resilience experiment:
+```powershell
+# Start local API with explicit test authorization credentials
+$env:ENABLE_FAULT_INJECTION="true"
+$env:FAULT_INJECTION_AUTH_TOKEN="local-dev-trial-key-xyz"
+python -m uvicorn inventory_api.main:app --port 8001
+
+# Run an experiment trial using the runner CLI
+python -m experiment_runner.runner --scenario probe_failure --strategy k8s_self_heal
+```
+*Unauthorized requests to `/test/faults/*` without valid `X-Titan-Fault-Auth` are rejected with `401 Unauthorized` or `403 Forbidden`.*
 
 ---
 
 ## Automated Test Results
 
-TITAN enforces rigorous testing across unit, integration, API CRUD, probe health, RCA rules, and experiment execution:
+TITAN enforces 100% passing test coverage across unit, integration, API CRUD, probe health, RCA rules, and experiment execution:
 
 ```
 tests/api/test_fault_injection.py::test_fault_injection_requires_auth PASSED
+tests/api/test_fault_injection.py::test_fault_injection_disabled_when_flag_is_false PASSED
 tests/api/test_fault_injection.py::test_simulated_error_surge_and_recovery PASSED
 tests/api/test_health_probes.py::test_liveness_probe_healthy PASSED
 tests/api/test_health_probes.py::test_readiness_probe_healthy PASSED
@@ -139,10 +204,10 @@ tests/api/test_inventory_crud.py::test_get_nonexistent_item_returns_404 PASSED
 tests/api/test_inventory_crud.py::test_validation_error_returns_rfc_details PASSED
 tests/api/test_metrics_endpoint.py::test_metrics_endpoint_returns_prometheus_format PASSED
 tests/api/test_platform_api.py::test_platform_health PASSED
-tests/api/test_platform_api.py::test_service_registration_and_list PASSED
-tests/api/test_platform_api.py::test_environment_configuration PASSED
-tests/api/test_platform_api.py::test_incident_lifecycle PASSED
-tests/api/test_platform_api.py::test_experiment_and_benchmark_calculation PASSED
+tests/api/test_service_registration_and_list PASSED
+tests/api/test_environment_configuration PASSED
+tests/api/test_incident_lifecycle PASSED
+tests/api/test_experiment_and_benchmark_calculation PASSED
 tests/integration/test_database_persistence.py::test_database_persistence_across_transactions PASSED
 tests/integration/test_database_persistence.py::test_database_unique_sku_constraint PASSED
 tests/unit/test_experiment_runner.py::test_experiment_runner_full_cycle PASSED
@@ -158,39 +223,14 @@ tests/unit/test_inventory_models.py::test_item_create_short_sku_fails PASSED
 tests/unit/test_inventory_models.py::test_item_update_partial PASSED
 tests/unit/test_inventory_models.py::test_sqlalchemy_item_instantiation PASSED
 
-======================= 33 passed in 5.72s ========================
-```
-
----
-
-## Quick-Start Local Guide
-
-```powershell
-# 1. Clone & activate virtual environment
-.\.venv\Scripts\Activate.ps1
-
-# 2. Run all tests
-pytest -v
-
-# 3. Start Inventory API locally
-$env:PYTHONPATH="apps/inventory-api"
-$env:DATABASE_URL="sqlite:///./inventory.db"
-$env:ENABLE_FAULT_INJECTION="true"
-python -m uvicorn inventory_api.main:app --host 0.0.0.0 --port 8001
-
-# 4. In another terminal: Start Platform API
-$env:PYTHONPATH="services/platform-api:services/incident-engine:packages/common-models:."
-python -m uvicorn platform_api.main:app --host 0.0.0.0 --port 8000
-
-# 5. Run Platform CLI
-python scripts/titan.py service list
-python scripts/titan.py benchmark summary
+======================= 34 passed in 4.83s ========================
 ```
 
 ---
 
 ## Repository Documentation Index
 
+- [Post-Build Engineering Audit & Verification Report](docs/audits/POST_BUILD_AUDIT.md)
 - [Master Architecture Document](docs/architecture/ARCHITECTURE.md)
 - [End-to-End Setup Guide](docs/setup/END_TO_END_SETUP.md)
 - [GitHub Setup & Publication Guide](docs/setup/GITHUB_SETUP.md)

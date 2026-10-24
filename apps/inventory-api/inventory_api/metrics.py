@@ -3,7 +3,7 @@ TITAN Inventory API - Prometheus Metrics Instrumentation
 Exposes standard golden signals: rate, errors, duration, and domain gauges.
 """
 
-from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
 from starlette.responses import Response
 
 # 1. Traffic & Golden Signals

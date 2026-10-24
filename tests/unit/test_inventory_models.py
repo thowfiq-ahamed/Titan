@@ -4,8 +4,9 @@ Unit tests for Inventory Data Models and Pydantic Schemas.
 
 import pytest
 from pydantic import ValidationError
-from inventory_api.schemas.item import ItemCreate, ItemUpdate, ItemResponse
+
 from inventory_api.models.item import Item
+from inventory_api.schemas.item import ItemCreate, ItemUpdate
 
 
 def test_item_create_valid():

@@ -2,13 +2,12 @@
 TITAN Platform API - Empirical Reliability Benchmark Analytics
 """
 
-from typing import Dict, Any
 from fastapi import APIRouter, Depends
-from sqlalchemy import select, func
-from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-from ..database import get_platform_db, ExperimentModel
+from ..database import ExperimentModel, get_platform_db
 
 router = APIRouter(prefix="/api/v1/benchmarks", tags=["Reliability Benchmarks"])
 
@@ -27,7 +26,7 @@ class BenchmarkSummaryDTO(BaseModel):
     mean_time_to_detect_seconds: float
     mean_time_to_diagnose_seconds: float
     mean_time_to_recover_seconds: float
-    strategy_breakdown: Dict[str, StrategyMetric]
+    strategy_breakdown: dict[str, StrategyMetric]
 
 
 @router.get("/summary", response_model=BenchmarkSummaryDTO)
@@ -57,7 +56,7 @@ def get_benchmark_summary(db: Session = Depends(get_platform_db)):
     success_rate = round((len(successful) / total) * 100.0, 2)
 
     # Strategy breakdown
-    strategies: Dict[str, list] = {}
+    strategies: dict[str, list] = {}
     for exp in experiments:
         strategies.setdefault(exp.recovery_strategy_used, []).append(exp)
 

@@ -5,7 +5,7 @@ variable "environment" {
 
 variable "github_repo" {
   type        = string
-  default     = "titan-platform/titan"
+  default     = "thowfiq-ahamed/Titan"
   description = "GitHub org/repo for OIDC federation"
 }
 

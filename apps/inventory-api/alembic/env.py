@@ -1,17 +1,15 @@
-from logging.config import fileConfig
-import sys
 import os
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+import sys
+from logging.config import fileConfig
 
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 # Ensure app root is in sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from src.models.item import Base
-from src.config import settings
+from inventory_api.config import settings
+from inventory_api.models.item import Base
 
 config = context.config
 

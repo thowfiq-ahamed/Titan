@@ -2,8 +2,10 @@
 TITAN Platform API - Health Probes
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from fastapi import APIRouter
+
 from ..config import settings
 
 router = APIRouter(prefix="/health", tags=["Health"])
@@ -15,7 +17,7 @@ def get_liveness():
         "status": "alive",
         "service": settings.APP_NAME,
         "version": settings.APP_VERSION,
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "timestamp": datetime.now(UTC).isoformat()
     }
 
 
@@ -25,5 +27,5 @@ def get_readiness():
         "status": "ready",
         "service": settings.APP_NAME,
         "version": settings.APP_VERSION,
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "timestamp": datetime.now(UTC).isoformat()
     }

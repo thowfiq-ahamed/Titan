@@ -3,8 +3,7 @@ TITAN Incident Engine - Deterministic Diagnosis Rules
 Pure, auditable, explainable root-cause diagnosis without hallucinations.
 """
 
-from typing import Dict, Any, List, Optional
-from datetime import datetime, timezone
+from typing import Any
 
 
 class DiagnosisResult:
@@ -13,8 +12,8 @@ class DiagnosisResult:
         category: str,
         suspected_cause: str,
         confidence_score: float,
-        supporting_evidence: List[Dict[str, Any]],
-        contradictory_evidence: List[Dict[str, Any]],
+        supporting_evidence: list[dict[str, Any]],
+        contradictory_evidence: list[dict[str, Any]],
         recommended_recovery: str,
         action_permitted: bool = True
     ):
@@ -26,7 +25,7 @@ class DiagnosisResult:
         self.recommended_recovery = recommended_recovery
         self.action_permitted = action_permitted
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "category": self.category,
             "suspected_cause": self.suspected_cause,
@@ -41,9 +40,9 @@ class DiagnosisResult:
 def diagnose_incident(
     alert_name: str,
     alert_category: str,
-    annotations: Dict[str, str],
-    service_health: Dict[str, Any],
-    recent_deployment: Optional[Dict[str, Any]] = None
+    annotations: dict[str, str],
+    service_health: dict[str, Any],
+    recent_deployment: dict[str, Any] | None = None
 ) -> DiagnosisResult:
     """
     Evaluates observed telemetry and alerts against deterministic root-cause rules.

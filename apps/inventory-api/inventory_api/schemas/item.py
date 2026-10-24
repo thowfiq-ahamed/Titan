@@ -4,8 +4,8 @@ Pydantic v2 data transfer objects with strict validation.
 """
 
 from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel, Field, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ItemBase(BaseModel):
@@ -23,7 +23,7 @@ class ItemBase(BaseModel):
         description="Item human-readable name",
         examples=["Rackmount Server 1U"]
     )
-    description: Optional[str] = Field(
+    description: str | None = Field(
         None,
         max_length=2000,
         description="Detailed product or asset description"
@@ -54,12 +54,12 @@ class ItemCreate(ItemBase):
 
 
 class ItemUpdate(BaseModel):
-    sku: Optional[str] = Field(None, min_length=3, max_length=64)
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
-    description: Optional[str] = Field(None, max_length=2000)
-    category: Optional[str] = Field(None, min_length=1, max_length=100)
-    quantity: Optional[int] = Field(None, ge=0)
-    price: Optional[float] = Field(None, ge=0.0)
+    sku: str | None = Field(None, min_length=3, max_length=64)
+    name: str | None = Field(None, min_length=1, max_length=255)
+    description: str | None = Field(None, max_length=2000)
+    category: str | None = Field(None, min_length=1, max_length=100)
+    quantity: int | None = Field(None, ge=0)
+    price: float | None = Field(None, ge=0.0)
 
 
 class ItemResponse(ItemBase):

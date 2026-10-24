@@ -3,8 +3,9 @@ TITAN Platform API - Authentication & Security
 Provides API key and Token validation dependencies.
 """
 
-from fastapi import Security, HTTPException, status
+from fastapi import HTTPException, Security, status
 from fastapi.security import APIKeyHeader
+
 from .config import settings
 
 api_key_header = APIKeyHeader(name="X-Titan-API-Key", auto_error=False)

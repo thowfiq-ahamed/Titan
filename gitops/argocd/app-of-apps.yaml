@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/titan-platform/titan.git
+    repoURL: https://github.com/thowfiq-ahamed/Titan.git
     targetRevision: staging
     path: deploy/kustomize/overlays/staging
   destination:
@@ -31,7 +31,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/titan-platform/titan.git
+    repoURL: https://github.com/thowfiq-ahamed/Titan.git
     targetRevision: main
     path: deploy/kustomize/overlays/prod
   destination:
@@ -52,7 +52,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/titan-platform/titan.git
+    repoURL: https://github.com/thowfiq-ahamed/Titan.git
     targetRevision: HEAD
     path: gitops/argocd
   destination:

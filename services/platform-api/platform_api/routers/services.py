@@ -2,14 +2,14 @@
 TITAN Platform API - Service Catalog Endpoints
 """
 
-from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 
-from ..database import get_platform_db, ServiceModel
 from ..auth import require_api_key
+from ..database import ServiceModel, get_platform_db
 
 router = APIRouter(prefix="/api/v1/services", tags=["Service Catalog"])
 
@@ -19,7 +19,7 @@ class ServiceCreateDTO(BaseModel):
     display_name: str
     description: str | None = None
     owner_team: str = "platform-engineering"
-    repo_url: str = "https://github.com/titan-platform/titan"
+    repo_url: str = "https://github.com/thowfiq-ahamed/Titan"
     tier: str = "tier-1"
     health_endpoint: str = "/health/ready"
     metrics_endpoint: str = "/metrics"
@@ -31,7 +31,7 @@ class ServiceResponseDTO(ServiceCreateDTO):
     updated_at: str
 
 
-@router.get("", response_model=List[ServiceResponseDTO], summary="List registered services")
+@router.get("", response_model=list[ServiceResponseDTO], summary="List registered services")
 def list_services(db: Session = Depends(get_platform_db)):
     services = db.scalars(select(ServiceModel).order_by(ServiceModel.name)).all()
     return [

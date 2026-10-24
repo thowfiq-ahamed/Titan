@@ -5,6 +5,7 @@ Configures in-memory SQLite isolation, mock database sessions, and FastAPI TestC
 
 import os
 import sys
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -15,7 +16,9 @@ from sqlalchemy.pool import StaticPool
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(root_dir, "apps", "inventory-api"))
 sys.path.insert(0, os.path.join(root_dir, "services", "platform-api"))
+sys.path.insert(0, os.path.join(root_dir, "services", "incident-engine"))
 sys.path.insert(0, os.path.join(root_dir, "packages", "common-models"))
+sys.path.insert(0, os.path.join(root_dir, "packages", "experiment-runner"))
 sys.path.insert(0, root_dir)
 
 # Force test environment variables before importing app
@@ -24,9 +27,9 @@ os.environ["ENABLE_FAULT_INJECTION"] = "true"
 os.environ["FAULT_INJECTION_AUTH_TOKEN"] = "test-token-xyz"
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 
-from inventory_api.main import app
-from inventory_api.database import get_db
-from inventory_api.models.item import Base
+from inventory_api.database import get_db  # noqa: E402
+from inventory_api.main import app  # noqa: E402
+from inventory_api.models.item import Base  # noqa: E402
 
 # In-memory SQLite engine for fast, isolated tests
 test_engine = create_engine(

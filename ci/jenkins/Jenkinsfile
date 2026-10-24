@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        REGISTRY = 'ghcr.io/titan-platform'
+        REGISTRY = 'ghcr.io/thowfiq-ahamed'
         IMAGE_NAME = 'titan-inventory-api'
         IMAGE_TAG = "build-${env.BUILD_NUMBER}"
         PYTHONPATH = 'apps/inventory-api:services/platform-api:packages/common-models:.'

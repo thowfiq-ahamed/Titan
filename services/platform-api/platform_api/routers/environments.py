@@ -2,14 +2,14 @@
 TITAN Platform API - Environment Configuration Endpoints
 """
 
-from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 
-from ..database import get_platform_db, EnvironmentModel
 from ..auth import require_api_key
+from ..database import EnvironmentModel, get_platform_db
 
 router = APIRouter(prefix="/api/v1/environments", tags=["Environments"])
 
@@ -29,7 +29,7 @@ class EnvironmentResponseDTO(EnvironmentCreateDTO):
     id: str
 
 
-@router.get("", response_model=List[EnvironmentResponseDTO])
+@router.get("", response_model=list[EnvironmentResponseDTO])
 def list_environments(db: Session = Depends(get_platform_db)):
     envs = db.scalars(select(EnvironmentModel)).all()
     return [

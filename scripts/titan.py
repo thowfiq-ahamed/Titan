@@ -3,12 +3,12 @@
 TITAN CLI - Platform Engineering & Reliability Intelligence Command-Line Interface
 """
 
-import sys
-import os
 import argparse
 import json
-import urllib.request
+import os
+import sys
 import urllib.error
+import urllib.request
 
 DEFAULT_API_URL = os.environ.get("TITAN_API_URL", "http://localhost:8000")
 DEFAULT_API_KEY = os.environ.get("TITAN_API_KEY", "titan-platform-master-key-2026")

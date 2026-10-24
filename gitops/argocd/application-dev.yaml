@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/titan-platform/titan.git
+    repoURL: https://github.com/thowfiq-ahamed/Titan.git
     targetRevision: HEAD
     path: deploy/kustomize/overlays/dev
   destination:

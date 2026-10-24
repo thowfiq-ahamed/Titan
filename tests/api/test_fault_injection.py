@@ -19,6 +19,19 @@ def test_fault_injection_requires_auth(client: TestClient):
     assert res_bad.status_code == 401
 
 
+def test_fault_injection_disabled_when_flag_is_false(client: TestClient, monkeypatch):
+    from inventory_api.config import settings
+
+    monkeypatch.setattr(settings, "ENABLE_FAULT_INJECTION", False)
+    res = client.post(
+        "/test/faults/probe",
+        json={"probe_type": "liveness", "fail": True},
+        headers={"X-Titan-Fault-Auth": "test-token-xyz"}
+    )
+    assert res.status_code == 403
+    assert "strictly disabled" in res.json()["detail"]
+
+
 def test_simulated_error_surge_and_recovery(client: TestClient):
     auth_headers = {"X-Titan-Fault-Auth": "test-token-xyz"}
 

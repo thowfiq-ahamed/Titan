@@ -3,17 +3,17 @@ TITAN Inventory API - Item CRUD Router
 Implements REST endpoints for managing inventory assets.
 """
 
-from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select, func, or_
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models.item import Item
-from ..schemas.item import ItemCreate, ItemUpdate, ItemResponse
-from ..schemas.common import PaginatedResponse
 from ..logging import logger
-from ..metrics import INVENTORY_ITEMS_TOTAL, DATABASE_ERRORS_TOTAL
+from ..metrics import DATABASE_ERRORS_TOTAL, INVENTORY_ITEMS_TOTAL
+from ..models.item import Item
+from ..schemas.common import PaginatedResponse
+from ..schemas.item import ItemCreate, ItemResponse, ItemUpdate
 
 router = APIRouter(prefix="/items", tags=["Inventory Items"])
 
@@ -27,8 +27,8 @@ router = APIRouter(prefix="/items", tags=["Inventory Items"])
 def list_items(
     skip: int = Query(0, ge=0, description="Offset for pagination"),
     limit: int = Query(50, ge=1, le=200, description="Page limit"),
-    category: Optional[str] = Query(None, description="Filter by category"),
-    search: Optional[str] = Query(None, description="Search term matching SKU or Name"),
+    category: str | None = Query(None, description="Filter by category"),
+    search: str | None = Query(None, description="Search term matching SKU or Name"),
     db: Session = Depends(get_db)
 ) -> PaginatedResponse[ItemResponse]:
     try:

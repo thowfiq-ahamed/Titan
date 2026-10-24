@@ -35,7 +35,7 @@ RUN groupadd -g 10001 appgroup && \
 COPY --from=builder /install /usr/local
 
 # Copy application source code and migrations
-COPY src/ /app/src/
+COPY inventory_api/ /app/inventory_api/
 COPY alembic/ /app/alembic/
 COPY alembic.ini /app/alembic.ini
 
@@ -54,4 +54,4 @@ EXPOSE 8001
 HEALTHCHECK --interval=15s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8001/health/live || exit 1
 
-ENTRYPOINT ["python", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8001"]
+ENTRYPOINT ["python", "-m", "uvicorn", "inventory_api.main:app", "--host", "0.0.0.0", "--port", "8001"]

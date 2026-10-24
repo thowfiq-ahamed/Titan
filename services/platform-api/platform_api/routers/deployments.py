@@ -2,15 +2,15 @@
 TITAN Platform API - Deployment Tracking Endpoints
 """
 
-from typing import List, Optional
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 
-from ..database import get_platform_db, DeploymentModel
 from ..auth import require_api_key
+from ..database import DeploymentModel, get_platform_db
 
 router = APIRouter(prefix="/api/v1/deployments", tags=["Deployments"])
 
@@ -24,9 +24,9 @@ class DeploymentCreateDTO(BaseModel):
 
 
 class DeploymentUpdateDTO(BaseModel):
-    status: Optional[str] = None
-    gitops_synced: Optional[bool] = None
-    healthy_replicas: Optional[int] = None
+    status: str | None = None
+    gitops_synced: bool | None = None
+    healthy_replicas: int | None = None
 
 
 class DeploymentResponseDTO(BaseModel):
@@ -40,13 +40,13 @@ class DeploymentResponseDTO(BaseModel):
     healthy_replicas: int
     desired_replicas: int
     started_at: str
-    completed_at: Optional[str] = None
+    completed_at: str | None = None
 
 
-@router.get("", response_model=List[DeploymentResponseDTO])
+@router.get("", response_model=list[DeploymentResponseDTO])
 def list_deployments(
-    service_id: Optional[str] = None,
-    environment: Optional[str] = None,
+    service_id: str | None = None,
+    environment: str | None = None,
     db: Session = Depends(get_platform_db)
 ):
     query = select(DeploymentModel)
@@ -122,7 +122,7 @@ def update_deployment_status(
     if payload.status:
         dep.status = payload.status
         if payload.status in ("healthy", "failed", "rolled_back"):
-            dep.completed_at = datetime.now(timezone.utc)
+            dep.completed_at = datetime.now(UTC)
     if payload.gitops_synced is not None:
         dep.gitops_synced = payload.gitops_synced
     if payload.healthy_replicas is not None:

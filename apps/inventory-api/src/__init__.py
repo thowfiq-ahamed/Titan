@@ -1,3 +1,0 @@
-"""
-TITAN Inventory API package.
-"""

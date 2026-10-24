@@ -20,7 +20,7 @@ spec:
         runAsUser: 10001
       containers:
         - name: inventory-api
-          image: ghcr.io/titan-platform/titan-inventory-api:v1.0.0
+          image: ghcr.io/thowfiq-ahamed/titan-inventory-api:v1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8001

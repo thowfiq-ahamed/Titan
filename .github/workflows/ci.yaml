@@ -35,11 +35,11 @@ jobs:
 
       - name: Lint and Format Check (Ruff)
         run: |
-          ruff check apps/ services/ packages/
+          ruff check apps/ services/ packages/ tests/ scripts/
 
       - name: Execute Automated Test Suite (Pytest)
         run: |
-          PYTHONPATH="apps/inventory-api:services/platform-api:packages/common-models:." pytest -v --cov=apps/inventory-api --cov-report=xml
+          PYTHONPATH="apps/inventory-api:services/platform-api:services/incident-engine:packages/common-models:packages/experiment-runner:." pytest -v --cov=apps/inventory-api --cov-report=xml
 
   # ----------------------------------------------------------------------------
   # Stage 2: Kubernetes & Manifest Validation
@@ -86,12 +86,22 @@ jobs:
           tags: titan-inventory-api:${{ github.sha }}
           load: true
 
-      - name: Run Trivy Vulnerability Scanner
-        uses: aquasecurity/trivy-action@master
+      - name: Run Trivy Vulnerability Scanner (Informational Summary)
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: titan-inventory-api:${{ github.sha }}
           format: 'table'
           exit-code: '0'
           ignore-unfixed: true
           vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          severity: 'HIGH,CRITICAL'
+
+      - name: Enforce Security Policy (Fail on Fixable CRITICAL Vulnerabilities)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: titan-inventory-api:${{ github.sha }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL'

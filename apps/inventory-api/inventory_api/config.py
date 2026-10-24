@@ -3,9 +3,9 @@ TITAN Inventory API - Configuration Management
 Centralized, validated settings using Pydantic Settings.
 """
 
-from typing import List
-from pydantic_settings import BaseSettings, SettingsConfigDict
+
 from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -41,12 +41,12 @@ class Settings(BaseSettings):
         description="Enables test-only failure simulation endpoints. MUST be false in production."
     )
     FAULT_INJECTION_AUTH_TOKEN: str = Field(
-        default="dev-reliability-test-key-32ch",
-        description="Bearer token or header required to trigger simulated faults."
+        default="",
+        description="Bearer token or header required to trigger simulated faults. Must be explicitly injected."
     )
 
     # CORS
-    CORS_ORIGINS: List[str] = ["*"]
+    CORS_ORIGINS: list[str] = ["*"]
 
 
 settings = Settings()

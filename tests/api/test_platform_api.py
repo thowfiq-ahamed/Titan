@@ -8,8 +8,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from platform_api.database import Base as PlatformBase
+from platform_api.database import get_platform_db
 from platform_api.main import app as platform_app
-from platform_api.database import Base as PlatformBase, get_platform_db
 
 test_engine = create_engine(
     "sqlite:///:memory:",

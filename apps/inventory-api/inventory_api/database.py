@@ -4,9 +4,10 @@ Configures SQLAlchemy connection pooling and session lifecycle.
 """
 
 import time
-from typing import Generator, Tuple
+from collections.abc import Generator
+
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from .config import settings
@@ -49,7 +50,7 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
-def check_database_health() -> Tuple[bool, float, str]:
+def check_database_health() -> tuple[bool, float, str]:
     """
     Executes a fast probe query ('SELECT 1') to verify database readiness.
     Returns: (is_healthy, latency_ms, status_message)

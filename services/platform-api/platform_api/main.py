@@ -2,15 +2,16 @@
 TITAN Platform API - Main Application
 """
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 
 from .config import settings
-from .database import init_platform_db, SessionLocal, ServiceModel, EnvironmentModel
-from .routers import health, services, environments, deployments, incidents, experiments, benchmarks
+from .database import EnvironmentModel, ServiceModel, SessionLocal, init_platform_db
+from .routers import benchmarks, deployments, environments, experiments, health, incidents, services
 
 
 def seed_defaults():
@@ -23,7 +24,7 @@ def seed_defaults():
                 display_name="Enterprise Inventory API",
                 description="Core inventory and asset management microservice",
                 owner_team="platform-engineering",
-                repo_url="https://github.com/titan-platform/titan",
+                repo_url="https://github.com/thowfiq-ahamed/Titan",
                 tier="tier-1",
                 health_endpoint="/health/ready",
                 metrics_endpoint="/metrics"

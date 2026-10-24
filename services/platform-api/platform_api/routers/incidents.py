@@ -2,15 +2,16 @@
 TITAN Platform API - Incident & Diagnosis Management Endpoints
 """
 
-from typing import List, Optional, Dict, Any
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 
-from ..database import get_platform_db, IncidentModel
 from ..auth import require_api_key
+from ..database import IncidentModel, get_platform_db
 
 router = APIRouter(prefix="/api/v1/incidents", tags=["Incidents"])
 
@@ -22,18 +23,18 @@ class IncidentCreateDTO(BaseModel):
     category: str = "bad_release"
     suspected_cause: str
     confidence_score: float = 0.95
-    supporting_evidence: List[Dict[str, Any]] = []
-    contradictory_evidence: List[Dict[str, Any]] = []
+    supporting_evidence: list[dict[str, Any]] = []
+    contradictory_evidence: list[dict[str, Any]] = []
     recommended_recovery: str = "app_rollback"
     recovery_status: str = "recommended"
-    actual_recovery_action: Optional[str] = None
-    verification_passed: Optional[bool] = None
+    actual_recovery_action: str | None = None
+    verification_passed: bool | None = None
 
 
 class IncidentResponseDTO(IncidentCreateDTO):
     id: str
     detected_at: str
-    resolved_at: Optional[str] = None
+    resolved_at: str | None = None
 
 
 class IncidentResolveDTO(BaseModel):
@@ -42,11 +43,11 @@ class IncidentResolveDTO(BaseModel):
     verification_passed: bool
 
 
-@router.get("", response_model=List[IncidentResponseDTO])
+@router.get("", response_model=list[IncidentResponseDTO])
 def list_incidents(
-    service_id: Optional[str] = None,
-    environment: Optional[str] = None,
-    category: Optional[str] = None,
+    service_id: str | None = None,
+    environment: str | None = None,
+    category: str | None = None,
     db: Session = Depends(get_platform_db)
 ):
     query = select(IncidentModel)
@@ -137,7 +138,7 @@ def resolve_incident(
     inc.recovery_status = payload.recovery_status
     inc.actual_recovery_action = payload.actual_recovery_action
     inc.verification_passed = payload.verification_passed
-    inc.resolved_at = datetime.now(timezone.utc)
+    inc.resolved_at = datetime.now(UTC)
 
     db.commit()
     db.refresh(inc)

@@ -4,11 +4,11 @@ Ingests Prometheus Alertmanager webhooks, performs deterministic RCA,
 and coordinates policy-controlled recovery.
 """
 
-from typing import List, Dict, Any, Optional
-from datetime import datetime, timezone
 import json
 import urllib.request
-from fastapi import FastAPI, Header, HTTPException, status
+from typing import Any
+
+from fastapi import FastAPI, Header
 from pydantic import BaseModel
 
 from .config import settings
@@ -23,10 +23,10 @@ app = FastAPI(
 
 class AlertItem(BaseModel):
     status: str
-    labels: Dict[str, str] = {}
-    annotations: Dict[str, str] = {}
-    startsAt: Optional[str] = None
-    endsAt: Optional[str] = None
+    labels: dict[str, str] = {}
+    annotations: dict[str, str] = {}
+    startsAt: str | None = None
+    endsAt: str | None = None
 
 
 class AlertmanagerWebhookPayload(BaseModel):
@@ -34,10 +34,10 @@ class AlertmanagerWebhookPayload(BaseModel):
     groupKey: str = ""
     status: str = "firing"
     receiver: str = "titan-incident-engine-webhook"
-    alerts: List[AlertItem] = []
+    alerts: list[AlertItem] = []
 
 
-def record_to_platform_api(diagnosis_data: Dict[str, Any], service_id: str, env: str) -> Optional[str]:
+def record_to_platform_api(diagnosis_data: dict[str, Any], service_id: str, env: str) -> str | None:
     """Posts the diagnosed incident to the central TITAN Platform API."""
     if not settings.PLATFORM_API_URL:
         return None
@@ -85,7 +85,7 @@ def get_readiness():
 @app.post("/api/v1/alerts")
 def receive_alertmanager_webhook(
     payload: AlertmanagerWebhookPayload,
-    authorization: Optional[str] = Header(None)
+    authorization: str | None = Header(None)
 ):
     """
     Webhook handler for Alertmanager notifications.

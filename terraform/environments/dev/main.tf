@@ -31,6 +31,7 @@ module "eks" {
   source             = "../../modules/eks"
   environment        = "dev"
   cluster_name       = "titan-eks"
+  cluster_version    = var.kubernetes_version
   cluster_role_arn   = module.iam.eks_cluster_role_arn
   node_role_arn      = module.iam.eks_nodes_role_arn
   private_subnet_ids = module.vpc.private_app_subnet_ids

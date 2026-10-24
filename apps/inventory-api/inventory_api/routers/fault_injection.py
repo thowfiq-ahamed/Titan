@@ -4,19 +4,20 @@ Used strictly by TITAN Reliability Lab for empirical resilience benchmarking.
 Guarded by security flags and auth tokens. NEVER enabled in production.
 """
 
-from typing import Dict, Any
+from typing import Any
+
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 from pydantic import BaseModel, Field
 
 from ..config import settings
 from ..logging import logger
 from ..metrics import SIMULATED_FAULTS_TOTAL
-from .health import set_simulated_probe_fault, get_simulated_probe_faults
+from .health import get_simulated_probe_faults, set_simulated_probe_fault
 
 router = APIRouter(prefix="/test/faults", tags=["Reliability Lab Fault Injection"])
 
 # In-memory fault state
-_fault_state: Dict[str, Any] = {
+_fault_state: dict[str, Any] = {
     "error_rate_enabled": False,
     "error_rate_percentage": 0,
     "artificial_latency_ms": 0,
@@ -35,8 +36,8 @@ def verify_fault_injection_authorized(
             detail="Controlled fault injection is strictly disabled in this environment."
         )
 
-    if x_titan_fault_auth != settings.FAULT_INJECTION_AUTH_TOKEN:
-        logger.warning("Unauthorized fault injection attempt with invalid token.")
+    if not settings.FAULT_INJECTION_AUTH_TOKEN or x_titan_fault_auth != settings.FAULT_INJECTION_AUTH_TOKEN:
+        logger.warning("Unauthorized fault injection attempt with invalid or unconfigured token.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid fault injection authorization token."
@@ -67,7 +68,7 @@ class DbOutageFaultRequest(BaseModel):
     summary="Get Active Fault State",
     dependencies=[Depends(verify_fault_injection_authorized)]
 )
-def get_fault_status() -> Dict[str, Any]:
+def get_fault_status() -> dict[str, Any]:
     probes = get_simulated_probe_faults()
     return {
         "fault_injection_enabled": settings.ENABLE_FAULT_INJECTION,
@@ -82,7 +83,7 @@ def get_fault_status() -> Dict[str, Any]:
     summary="Simulate Kubernetes Probe Failure",
     dependencies=[Depends(verify_fault_injection_authorized)]
 )
-def inject_probe_fault(payload: ProbeFaultRequest) -> Dict[str, Any]:
+def inject_probe_fault(payload: ProbeFaultRequest) -> dict[str, Any]:
     probe_key = f"{payload.probe_type.lower()}_failure"
     set_simulated_probe_fault(probe_key, payload.fail)
     action = "injected" if payload.fail else "cleared"
@@ -96,7 +97,7 @@ def inject_probe_fault(payload: ProbeFaultRequest) -> Dict[str, Any]:
     summary="Simulate Service Latency",
     dependencies=[Depends(verify_fault_injection_authorized)]
 )
-def inject_latency_fault(payload: LatencyFaultRequest) -> Dict[str, Any]:
+def inject_latency_fault(payload: LatencyFaultRequest) -> dict[str, Any]:
     _fault_state["artificial_latency_ms"] = payload.latency_ms
     SIMULATED_FAULTS_TOTAL.labels(fault_type="latency").inc()
     logger.info(f"Reliability Lab: configured artificial latency of {payload.latency_ms}ms")
@@ -108,7 +109,7 @@ def inject_latency_fault(payload: LatencyFaultRequest) -> Dict[str, Any]:
     summary="Simulate HTTP 500 Error Surge (Bad Release)",
     dependencies=[Depends(verify_fault_injection_authorized)]
 )
-def inject_error_surge_fault(payload: ErrorSurgeFaultRequest) -> Dict[str, Any]:
+def inject_error_surge_fault(payload: ErrorSurgeFaultRequest) -> dict[str, Any]:
     _fault_state["error_rate_enabled"] = payload.enabled
     _fault_state["error_rate_percentage"] = payload.percentage
     SIMULATED_FAULTS_TOTAL.labels(fault_type="error_surge").inc()
@@ -121,7 +122,7 @@ def inject_error_surge_fault(payload: ErrorSurgeFaultRequest) -> Dict[str, Any]:
     summary="Clear All Injected Faults",
     dependencies=[Depends(verify_fault_injection_authorized)]
 )
-def reset_all_faults() -> Dict[str, Any]:
+def reset_all_faults() -> dict[str, Any]:
     set_simulated_probe_fault("liveness_failure", False)
     set_simulated_probe_fault("readiness_failure", False)
     _fault_state["error_rate_enabled"] = False
@@ -132,5 +133,5 @@ def reset_all_faults() -> Dict[str, Any]:
     return {"status": "success", "message": "All simulated faults reset to healthy baseline."}
 
 
-def get_runtime_fault_state() -> Dict[str, Any]:
+def get_runtime_fault_state() -> dict[str, Any]:
     return _fault_state

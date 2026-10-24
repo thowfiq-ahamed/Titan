@@ -10,7 +10,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1m
-  url: https://github.com/titan-platform/titan.git
+  url: https://github.com/thowfiq-ahamed/Titan.git
   ref:
     branch: main
   ignore: |

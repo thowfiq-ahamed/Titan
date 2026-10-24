@@ -16,8 +16,14 @@ variable "availability_zones" {
   description = "Availability zones to utilize"
 }
 
+variable "kubernetes_version" {
+  type        = string
+  default     = "1.31"
+  description = "Target Kubernetes version for EKS cluster"
+}
+
 variable "github_repo" {
   type        = string
-  default     = "titan-platform/titan"
+  default     = "thowfiq-ahamed/Titan"
   description = "GitHub repository for OIDC identity federation"
 }

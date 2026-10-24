@@ -3,7 +3,8 @@ TITAN Inventory API - Health Probes
 Implements Kubernetes-compatible liveness and readiness probes.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Response, status
 from pydantic import BaseModel
 
@@ -51,7 +52,7 @@ def get_liveness(response: Response) -> HealthStatus:
             status="unhealthy",
             service=settings.APP_NAME,
             version=settings.APP_VERSION,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             environment=settings.ENVIRONMENT,
             details={"error": "Simulated liveness deadlock active"}
         )
@@ -60,7 +61,7 @@ def get_liveness(response: Response) -> HealthStatus:
         status="alive",
         service=settings.APP_NAME,
         version=settings.APP_VERSION,
-        timestamp=datetime.now(timezone.utc).isoformat(),
+        timestamp=datetime.now(UTC).isoformat(),
         environment=settings.ENVIRONMENT
     )
 
@@ -79,7 +80,7 @@ def get_readiness(response: Response) -> HealthStatus:
             status="not_ready",
             service=settings.APP_NAME,
             version=settings.APP_VERSION,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             environment=settings.ENVIRONMENT,
             details={"dependency": "readiness_simulation", "error": "Simulated readiness probe failure active"}
         )
@@ -93,7 +94,7 @@ def get_readiness(response: Response) -> HealthStatus:
             status="not_ready",
             service=settings.APP_NAME,
             version=settings.APP_VERSION,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             environment=settings.ENVIRONMENT,
             details={"database": {"healthy": False, "latency_ms": latency_ms, "message": msg}}
         )
@@ -102,7 +103,7 @@ def get_readiness(response: Response) -> HealthStatus:
         status="ready",
         service=settings.APP_NAME,
         version=settings.APP_VERSION,
-        timestamp=datetime.now(timezone.utc).isoformat(),
+        timestamp=datetime.now(UTC).isoformat(),
         environment=settings.ENVIRONMENT,
         details={"database": {"healthy": True, "latency_ms": latency_ms}}
     )

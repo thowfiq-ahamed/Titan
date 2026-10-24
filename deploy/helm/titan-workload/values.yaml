@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: ghcr.io/titan-platform/titan-inventory-api
+  repository: ghcr.io/thowfiq-ahamed/titan-inventory-api
   pullPolicy: IfNotPresent
   tag: "v1.0.0"
 

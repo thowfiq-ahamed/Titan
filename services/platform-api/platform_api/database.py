@@ -3,10 +3,11 @@ TITAN Platform API - Database Engine and Models
 """
 
 import uuid
-from datetime import datetime, timezone
-from typing import Generator
-from sqlalchemy import create_engine, String, Text, Integer, Float, Boolean, DateTime, JSON
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker, Session
+from collections.abc import Generator
+from datetime import UTC, datetime
+
+from sqlalchemy import JSON, Boolean, DateTime, Float, Integer, String, Text, create_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from .config import settings
@@ -25,12 +26,12 @@ class ServiceModel(Base):
     display_name: Mapped[str] = mapped_column(String(128), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     owner_team: Mapped[str] = mapped_column(String(64), default="platform-engineering")
-    repo_url: Mapped[str] = mapped_column(String(255), default="https://github.com/titan-platform/titan")
+    repo_url: Mapped[str] = mapped_column(String(255), default="https://github.com/thowfiq-ahamed/Titan")
     tier: Mapped[str] = mapped_column(String(16), default="tier-1")
     health_endpoint: Mapped[str] = mapped_column(String(128), default="/health/ready")
     metrics_endpoint: Mapped[str] = mapped_column(String(128), default="/metrics")
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
 
 
 # 2. Environment Model
@@ -61,7 +62,7 @@ class DeploymentModel(Base):
     gitops_synced: Mapped[bool] = mapped_column(Boolean, default=False)
     healthy_replicas: Mapped[int] = mapped_column(Integer, default=0)
     desired_replicas: Mapped[int] = mapped_column(Integer, default=2)
-    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
@@ -74,7 +75,7 @@ class IncidentModel(Base):
     environment: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
     severity: Mapped[str] = mapped_column(String(8), default="P2")
     category: Mapped[str] = mapped_column(String(64), default="unknown")
-    detected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    detected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     suspected_cause: Mapped[str] = mapped_column(Text, nullable=False)
     confidence_score: Mapped[float] = mapped_column(Float, default=0.95)
@@ -102,7 +103,7 @@ class ExperimentModel(Base):
     recovery_time_sec: Mapped[float] = mapped_column(Float, default=0.0)
     recovery_strategy_used: Mapped[str] = mapped_column(String(64), default="k8s_self_heal")
     verified: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
 
 # Engine setup

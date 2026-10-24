@@ -8,6 +8,12 @@ variable "environment" {
   description = "Environment name"
 }
 
+variable "cluster_version" {
+  type        = string
+  default     = "1.31"
+  description = "Kubernetes control plane and node group version"
+}
+
 variable "cluster_role_arn" {
   type        = string
   description = "IAM Role ARN for EKS cluster"
@@ -33,7 +39,7 @@ variable "instance_types" {
 resource "aws_eks_cluster" "cluster" {
   name     = "${var.cluster_name}-${var.environment}"
   role_arn = var.cluster_role_arn
-  version  = "1.30"
+  version  = var.cluster_version
 
   vpc_config {
     subnet_ids              = var.private_subnet_ids
@@ -54,6 +60,7 @@ resource "aws_eks_node_group" "nodes" {
   cluster_name    = aws_eks_cluster.cluster.name
   node_group_name = "titan-managed-nodes-${var.environment}"
   node_role_arn   = var.node_role_arn
+  version         = var.cluster_version
   subnet_ids      = var.private_subnet_ids
   instance_types  = var.instance_types
 

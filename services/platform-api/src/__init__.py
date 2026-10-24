@@ -1,3 +1,0 @@
-"""
-TITAN Platform API Package
-"""

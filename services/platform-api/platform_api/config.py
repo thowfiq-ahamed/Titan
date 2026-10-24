@@ -2,9 +2,9 @@
 TITAN Platform API - Configuration
 """
 
-from typing import List
-from pydantic_settings import BaseSettings, SettingsConfigDict
+
 from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -35,7 +35,7 @@ class Settings(BaseSettings):
 
     # Workload Service Integration
     INVENTORY_API_URL: str = Field(default="http://localhost:8001")
-    CORS_ORIGINS: List[str] = ["*"]
+    CORS_ORIGINS: list[str] = ["*"]
 
 
 settings = Settings()

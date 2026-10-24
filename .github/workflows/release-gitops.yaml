@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   packages: write
+  pull-requests: write
 
 jobs:
   publish-and-sync:
@@ -27,12 +28,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Determine Immutable Image Tag
+      - name: Determine Lowercase Image Reference & Immutable Tag
         id: meta
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           echo "IMAGE_TAG=sha-${SHORT_SHA}" >> $GITHUB_OUTPUT
-          echo "REGISTRY_IMAGE=ghcr.io/${{ github.repository }}/inventory-api" >> $GITHUB_OUTPUT
+          echo "REGISTRY_IMAGE=ghcr.io/${REPO_LOWER}/titan-inventory-api" >> $GITHUB_OUTPUT
 
       - name: Build and Push Immutable Container Image
         uses: docker/build-push-action@v5
@@ -43,12 +45,27 @@ jobs:
           tags: |
             ${{ steps.meta.outputs.REGISTRY_IMAGE }}:${{ steps.meta.outputs.IMAGE_TAG }}
 
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v2
+
       - name: Update GitOps Kustomize Overlay
         run: |
           cd deploy/kustomize/overlays/dev
-          kustomize edit set image ghcr.io/titan-platform/titan-inventory-api:v1.0.0=${{ steps.meta.outputs.REGISTRY_IMAGE }}:${{ steps.meta.outputs.IMAGE_TAG }}
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add kustomization.yaml
-          git diff --quiet && git diff --staged --quiet || git commit -m "chore(gitops): update inventory-api to ${{ steps.meta.outputs.IMAGE_TAG }} [skip ci]"
-          git push origin main
+          kustomize edit set image ghcr.io/thowfiq-ahamed/titan-inventory-api=${{ steps.meta.outputs.REGISTRY_IMAGE }}:${{ steps.meta.outputs.IMAGE_TAG }}
+          kustomize build . > /dev/null
+
+      - name: Create GitOps Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(gitops): update dev inventory-api to ${{ steps.meta.outputs.IMAGE_TAG }}"
+          title: "chore(gitops): promote inventory-api ${{ steps.meta.outputs.IMAGE_TAG }} to dev"
+          body: |
+            ### Automated GitOps Deployment Gate
+            - **Image:** `${{ steps.meta.outputs.REGISTRY_IMAGE }}:${{ steps.meta.outputs.IMAGE_TAG }}`
+            - **Git Commit:** `${{ github.sha }}`
+            - **Target Overlay:** `deploy/kustomize/overlays/dev`
+            - **Branch Protection Safe:** Pull Request deployment workflow avoids direct unreviewed pushes to `main`.
+          branch: "gitops/deploy-dev-${{ steps.meta.outputs.IMAGE_TAG }}"
+          base: main
+          delete-branch: true
