@@ -1,0 +1,63 @@
+name: titan-platform
+
+services:
+  # ----------------------------------------------------------------------------
+  # PostgreSQL Persistence Store
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: titan-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-titan_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-titan_secure_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-titan_inventory}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-titan_user} -d ${POSTGRES_DB:-titan_inventory}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - titan-net
+
+  # ----------------------------------------------------------------------------
+  # Managed Workload: Inventory API
+  # ----------------------------------------------------------------------------
+  inventory-api:
+    build:
+      context: ./apps/inventory-api
+      dockerfile: Dockerfile
+    container_name: titan-inventory-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: development
+      LOG_LEVEL: INFO
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-titan_user}:${POSTGRES_PASSWORD:-titan_secure_pass}@postgres:5432/${POSTGRES_DB:-titan_inventory}
+      ENABLE_FAULT_INJECTION: "true"
+      FAULT_INJECTION_AUTH_TOKEN: ${FAULT_INJECTION_AUTH_TOKEN:-dev-reliability-test-key-32ch}
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health/live"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - titan-net
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  titan-net:
+    driver: bridge

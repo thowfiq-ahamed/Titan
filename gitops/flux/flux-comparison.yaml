@@ -1,0 +1,45 @@
+# ==============================================================================
+# FLUX CD ISOLATED DEMONSTRATION & ARCHITECTURAL COMPARISON
+# Note: Manages isolated namespace 'titan-flux-comparison' to prevent resource
+# collision with Argo CD (Rule 16).
+# ==============================================================================
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: titan-workload-source
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://github.com/titan-platform/titan.git
+  ref:
+    branch: main
+  ignore: |
+    /*
+    !/deploy/helm/titan-workload
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: titan-inventory-flux-demo
+  namespace: titan-flux-comparison
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: deploy/helm/titan-workload
+      sourceRef:
+        kind: GitRepository
+        name: titan-workload-source
+        namespace: flux-system
+      interval: 1m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    replicaCount: 1
+    env:
+      ENVIRONMENT: flux-comparison
+      LOG_LEVEL: INFO

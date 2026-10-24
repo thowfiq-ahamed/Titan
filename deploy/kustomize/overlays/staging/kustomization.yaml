@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: titan-staging
+namePrefix: staging-
+
+resources:
+  - ../../base
+
+patches:
+  - target:
+      kind: Deployment
+      name: inventory-api
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+
+configMapGenerator:
+  - name: inventory-api-config
+    behavior: merge
+    literals:
+      - ENVIRONMENT=staging
+      - LOG_LEVEL=INFO
+      - ENABLE_FAULT_INJECTION=true

@@ -1,0 +1,46 @@
+groups:
+  - name: titan-workload-alerts
+    rules:
+      - alert: TitanWorkloadDown
+        expr: up{job="titan-inventory-api"} == 0
+        for: 15s
+        labels:
+          severity: critical
+          category: container_crash
+          service: inventory-api
+        annotations:
+          summary: "Workload service instance unreachable"
+          description: "Inventory API instance has been down for > 15s."
+
+      - alert: TitanHighErrorRate
+        expr: rate(titan_http_requests_total{status_code=~"5.."}[1m]) > 0.05
+        for: 10s
+        labels:
+          severity: critical
+          category: bad_release
+          service: inventory-api
+        annotations:
+          summary: "Elevated HTTP 5xx error rate detected"
+          description: "Service is experiencing high 5xx error rate, likely caused by a broken release."
+
+      - alert: TitanDatabaseErrors
+        expr: rate(titan_database_errors_total[1m]) > 0
+        for: 10s
+        labels:
+          severity: high
+          category: dependency_outage
+          service: inventory-api
+        annotations:
+          summary: "Database connection failure detected"
+          description: "Workload is actively reporting database connection errors."
+
+      - alert: TitanSimulatedFaultActive
+        expr: titan_simulated_faults_total > 0
+        for: 5s
+        labels:
+          severity: warning
+          category: test_fault
+          service: inventory-api
+        annotations:
+          summary: "Controlled Reliability Lab fault active"
+          description: "Controlled fault injection experiment running on workload."

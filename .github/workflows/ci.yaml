@@ -1,0 +1,97 @@
+name: TITAN Continuous Integration & DevSecOps Gate
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # Stage 1: Quality, Linting & Automated Tests
+  # ----------------------------------------------------------------------------
+  test:
+    name: Test & Code Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r apps/inventory-api/requirements.txt
+          pip install ruff pytest-cov
+
+      - name: Lint and Format Check (Ruff)
+        run: |
+          ruff check apps/ services/ packages/
+
+      - name: Execute Automated Test Suite (Pytest)
+        run: |
+          PYTHONPATH="apps/inventory-api:services/platform-api:packages/common-models:." pytest -v --cov=apps/inventory-api --cov-report=xml
+
+  # ----------------------------------------------------------------------------
+  # Stage 2: Kubernetes & Manifest Validation
+  # ----------------------------------------------------------------------------
+  manifest-validation:
+    name: Validate Kubernetes & Kustomize Manifests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v2
+
+      - name: Validate Dev Overlay
+        run: kustomize build deploy/kustomize/overlays/dev > /dev/null
+
+      - name: Validate Staging Overlay
+        run: kustomize build deploy/kustomize/overlays/staging > /dev/null
+
+      - name: Validate Production Overlay
+        run: kustomize build deploy/kustomize/overlays/prod > /dev/null
+
+  # ----------------------------------------------------------------------------
+  # Stage 3: Container Build & Trivy Security Scan
+  # ----------------------------------------------------------------------------
+  security-scan:
+    name: Container Build & Vulnerability Scan
+    runs-on: ubuntu-latest
+    needs: [test, manifest-validation]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Local Container Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/inventory-api
+          file: ./apps/inventory-api/Dockerfile
+          push: false
+          tags: titan-inventory-api:${{ github.sha }}
+          load: true
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: titan-inventory-api:${{ github.sha }}
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'

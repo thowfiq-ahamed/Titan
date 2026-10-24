@@ -1,0 +1,18 @@
+# Trivy Security Configuration for TITAN Platform
+format: table
+exit-code: 0
+severity:
+  - HIGH
+  - CRITICAL
+vuln-type:
+  - os
+  - library
+ignore-unfixed: true
+timeout: 10m
+db:
+  skip-update: false
+scan:
+  file-patterns:
+    - "Dockerfile*"
+    - "requirements.txt"
+    - "compose.yaml"

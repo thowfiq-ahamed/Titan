@@ -1,0 +1,73 @@
+pipeline {
+    agent any
+
+    environment {
+        REGISTRY = 'ghcr.io/titan-platform'
+        IMAGE_NAME = 'titan-inventory-api'
+        IMAGE_TAG = "build-${env.BUILD_NUMBER}"
+        PYTHONPATH = 'apps/inventory-api:services/platform-api:packages/common-models:.'
+    }
+
+    options {
+        timeout(time: 20, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Static Analysis & Test') {
+            parallel {
+                stage('Python Quality & Unit Tests') {
+                    steps {
+                        sh '''
+                            python3 -m venv .venv
+                            . .venv/bin/activate
+                            pip install --upgrade pip
+                            pip install -r apps/inventory-api/requirements.txt
+                            pytest -v
+                        '''
+                    }
+                }
+                stage('Kubernetes Manifest Validation') {
+                    steps {
+                        sh '''
+                            kubectl kustomize deploy/kustomize/overlays/dev > /dev/null
+                            kubectl kustomize deploy/kustomize/overlays/staging > /dev/null
+                            kubectl kustomize deploy/kustomize/overlays/prod > /dev/null
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Container Build') {
+            steps {
+                sh """
+                    docker build -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} -f apps/inventory-api/Dockerfile apps/inventory-api
+                """
+            }
+        }
+
+        stage('DevSecOps Vulnerability Scan') {
+            steps {
+                sh """
+                    trivy image --severity HIGH,CRITICAL --exit-code 0 ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                """
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+        failure {
+            echo "Pipeline failed! Please check console log for diagnosis."
+        }
+    }
+}

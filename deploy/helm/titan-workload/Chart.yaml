@@ -1,0 +1,9 @@
+apiVersion: v2
+name: titan-workload
+description: Production-grade Helm chart for TITAN microservices
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+maintainers:
+  - name: TITAN Platform Engineering Team
+    email: platform@titan.internal
